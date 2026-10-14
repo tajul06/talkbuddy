@@ -1,0 +1,32 @@
+# Core Web & API
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+websockets
+python-multipart
+
+# Audio Processing & VAD
+numpy
+scipy
+soundfile
+soxr
+torch
+onnxruntime
+
+# Speech-to-Text
+faster-whisper
+
+# Text-to-Speech
+kokoro
+
+# LLM (already installed — listed for reference only)
+# llama-cpp-python
+
+# Logging
+loguru
+
+# Testing
+pytest
+pytest-asyncio
+httpx
