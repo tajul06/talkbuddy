@@ -21,6 +21,8 @@ env/
 # Models (large binary files)
 models/llm/*.gguf
 models/llm/*.bin
+models/whisper/*.bin
+models/whisper/*.zip
 
 # IDE
 .vscode/
@@ -40,3 +42,19 @@ htmlcov/
 # Logs
 *.log
 logs/
+
+# Test files
+test*.py
+test*.wav
+recording.wav
+
+# Scripts
+start_llm_server.sh
+
+# Node modules
+talkbuddy-ui/node_modules/
+talkbuddy-ui/dist/
+
+# Documentation
+PROGRESS.md
+CLAUDE.md

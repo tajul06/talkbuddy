@@ -1,8 +1,9 @@
 """
 TalkBuddy — Health check endpoint with GPU and model info.
+Pings the external llama.cpp server to verify LLM connectivity.
 """
 
-from pathlib import Path
+import httpx
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -23,7 +24,7 @@ class HealthResponse(BaseModel):
     version: str
     gpu_backend: str
     models: ModelStatus
-    llm_model_found: bool
+    llm_server_reachable: bool
     active_sessions: int
 
 
@@ -31,11 +32,19 @@ class HealthResponse(BaseModel):
 async def health_check() -> HealthResponse:
     """
     Returns system health, GPU backend info, and model availability.
-    Useful for verifying the server is up and all models are configured.
+    Pings the external llama.cpp server at LLM__API_URL to check connectivity.
     """
-    # Check if the GGUF model file exists at the configured path
-    llm_model_path = Path(settings.llm.model_path)
-    llm_model_found = llm_model_path.exists()
+    # Ping llama.cpp server /health
+    llm_reachable = False
+    llm_label = f"external @ {settings.llm.api_url}"
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            resp = await client.get(f"{settings.llm.api_url}/health")
+            llm_reachable = resp.status_code == 200
+            if llm_reachable:
+                llm_label = f"llama.cpp @ {settings.llm.api_url} (OK)"
+    except Exception:
+        llm_label = f"llama.cpp @ {settings.llm.api_url} (UNREACHABLE)"
 
     # Import session count lazily to avoid circular imports
     active_sessions = 0
@@ -46,15 +55,15 @@ async def health_check() -> HealthResponse:
         pass
 
     return HealthResponse(
-        status="healthy",
+        status="healthy" if llm_reachable else "degraded",
         version="0.1.0",
         gpu_backend="vulkan",
         models=ModelStatus(
             vad=settings.vad.model_name,
             stt=settings.stt.model_size,
-            llm=llm_model_path.name if llm_model_found else f"NOT FOUND ({settings.llm.model_path})",
+            llm=llm_label,
             tts=settings.tts.model_name,
         ),
-        llm_model_found=llm_model_found,
+        llm_server_reachable=llm_reachable,
         active_sessions=active_sessions,
     )

@@ -28,8 +28,12 @@ class VADSettings(BaseSettings):
 
 
 class STTSettings(BaseSettings):
-    """Speech-to-Text settings (faster-whisper)."""
-    model_size: str = Field(default="large-v3-turbo", description="faster-whisper model tag/path")
+    """Speech-to-Text settings (faster-whisper or whisper.cpp)."""
+    backend: Literal["faster-whisper", "whisper.cpp"] = Field(
+        default="whisper.cpp",
+        description="STT backend engine"
+    )
+    model_size: str = Field(default="small", description="Model size")
     device: Literal["cpu", "cuda", "auto"] = Field(default="cpu", description="CTranslate2 device")
     compute_type: Literal["default", "int8", "float16"] = Field(default="int8", description="Quantization")
     beam_size: int = Field(default=1, description="Greedy search for minimum latency")
@@ -37,12 +41,8 @@ class STTSettings(BaseSettings):
 
 
 class LLMSettings(BaseSettings):
-    """LLM settings (llama-cpp-python with Vulkan)."""
-    model_path: str = Field(default="models/llm/model.gguf", description="Path to GGUF model file")
-    n_gpu_layers: int = Field(default=-1, description="GPU layers offloaded to Vulkan (-1 for all)")
-    n_ctx: int = Field(default=4096, description="Context window size")
-    n_threads: int = Field(default=8, description="CPU threads for non-offloaded layers")
-    n_batch: int = Field(default=512, description="Batch size for prompt processing")
+    """LLM settings (external llama.cpp server via HTTP API)."""
+    api_url: str = Field(default="http://localhost:8080", description="llama.cpp server URL")
     temperature: float = Field(default=0.7, description="Sampling temperature")
     top_p: float = Field(default=0.9, description="Top-p sampling")
     max_tokens: int = Field(default=256, description="Max generated tokens per turn")

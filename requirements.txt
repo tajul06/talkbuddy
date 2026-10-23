@@ -20,9 +20,6 @@ faster-whisper
 # Text-to-Speech
 kokoro
 
-# LLM (already installed — listed for reference only)
-# llama-cpp-python
-
 # Logging
 loguru
 
